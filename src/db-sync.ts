@@ -46,10 +46,9 @@ const MAX_PAGES = 7
 async function fetchPlayers(search: string = ''){
 
   const players = []
-  let page = 1
   const pages = []
 
-  while(true){
+  for( let page = 1 ; page <= MAX_PAGES; page++){
     pages.push( axios.post(
       'https://api.ageofempires.com/api/v2/agede/Leaderboard',
       { 
@@ -66,9 +65,7 @@ async function fetchPlayers(search: string = ''){
           if (p) players.push(p)
         })
     }))
-  
-    if (page > MAX_PAGES) break
-    page++
+
   }
 
   await Promise.all(pages)
