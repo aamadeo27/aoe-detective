@@ -25,6 +25,7 @@ const dao = {
     }
 
     const names = (await db.all('select * from nabs_names where id = ?', id)).map(n => n.name)
+    await db.run('update nabs set elo = ? where id = ?', elo, id)
     
     
     if (!names.includes(name)) {
