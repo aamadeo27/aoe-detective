@@ -1,46 +1,37 @@
 import { exit } from "process"
-import { PromisedDatabase } from "promised-sqlite3"
 import * as readline from 'readline'
-
-const sql = {
-  getId: 'select id from nabs_names where name like ?',
-  allById: 
-    `select nn.name, n.elo 
-       from nabs n, nabs_names nn 
-      where n.id = nn.id 
-        and n.id = ?`
-}
-
-const db = new PromisedDatabase()
-
-async function init() {
-  await db.open("./nabs.sqlite") // create a sqlite3.Database object & open the database on the passed filepath.
- 
-  // run some sql request.
-  await db.run("CREATE TABLE IF NOT EXISTS nabs (id INTEGER PRIMARY KEY, elo INTEGER, avatar TEXT NOT NULL)")
-  await db.run("CREATE TABLE IF NOT EXISTS nabs_names (id INTEGER, name TEXT, added_at DATE, PRIMARY KEY (id, name))");
-  await db.run("CREATE INDEX IF NOT EXISTS nabs_names_idx_name on nabs_names( name )")
-}
+import dao from "./dao"
+import { makeTeams } from 'teams'
 
 const commands = {
   exit: () => exit(0),
-  whothisnab: async (name) => {
-    let data = await db.all(sql.getId, name)
+  updateDB: () => dao.updateDB(),
+  async whothisnab(name: string){
+
+    let data = await dao.getNabLike(name)
     if (!data) return undefined
 
-    return await Promise.all(data.map(async p => {
-      const id = p.id
+    return await Promise.all(
+      data.map(async p => {
+        const id = p.id
+        let names = await dao.getNamesById(id)
 
-      let names = await db.all(sql.allById, id)
+        return {
+          id: id,
+          elo: names[0].elo,
+          names: names.map(d => d.name)
+        }
+      })
+    )
+  },
 
-      return {
-        id: id,
-        elo: names[0].elo,
-        names: names.map(d => d.name)
-      }
-    }))
-  }
+  getNabLike(name){
+    return dao.getNabLike(name)
+  },
+
+  makeTeams,
 }
+
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })
 rl.on('line',  async (line) => {
   let dl = line.indexOf(' ')
@@ -60,7 +51,7 @@ rl.on('line',  async (line) => {
 
 
 async function main(){
-  await init()
+  await dao.init()
 }
 
 main()
