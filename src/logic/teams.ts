@@ -1,5 +1,5 @@
-import axios from "axios"
-import dao from "./dao"
+import dao from "../db"
+import { getNab } from "./common"
 
 type Player = {
   elo: number
@@ -21,8 +21,6 @@ const evalTeams = (selector, players: Player[]) => {
       teams[t].elo += players[p].elo
   })
 
-  // console.log(teams.map(t => t.players.map( p => p.name )))
-
   teams.forEach( team => {
       const n = team.players.length
       team.sqAvg = team.elo ** 2 / n
@@ -35,7 +33,7 @@ const evalTeams = (selector, players: Player[]) => {
       team.std = Math.sqrt( team.variance )
   });
 
-  const vs = (i, size) => (i+1) === size ? 'vs' : ''
+
   const division = {
       selector: selector.map( i => i+1 ).join(''),
       selector2: `${
@@ -100,17 +98,13 @@ export const makeTeams = async (list: string) => {
   const conflicts = []
   const errors = []
   const result = await Promise.all(
-    names.map(async (name, i) => name.match(/^#.+$/)
-      ? [await dao.getNabById(parseInt(name.substring(1)))]
-      : name.match(/^\$\d+$/)
-      ? [{ name: 'Player ' + (i+1), elo: parseInt(name.substring(1), 10)}]
-      : dao.getNabLike(name))
+    names.map(n => getNab(n, 0, true)) // just by name
   )
-  console.log(result)
+
+
   const playerList = result.map( (r: any, i) => {
 
     if (!r) return errors.push(`${names[i]} was not found`)
-    console.log(r)
     if (r.length && r.length === 1) return r[0]
     
     conflicts.push(`${r.length} players found for ${names[i]} : ${r.map(n => `${n.name}(#${n.id})`).join(', ')}`)
@@ -121,20 +115,7 @@ export const makeTeams = async (list: string) => {
   if ( errors.length > 0 ) return { errors }
   if ( conflicts.length > 0 ) return { conflicts }
 
-
   const division = teamsFromPlayers(playerList)
 
-  console.log(division.selector)
-  console.log(division.selector2)
-  console.log(division.diff)
-  console.log(division.sqDiff)
-  console.log(division.teams[0].players.map(({ elo, name }) => ({ elo, name})))
-  console.log(division.teams[0].avg)
-  console.log(division.teams[0].elo)
-  console.log(division.teams[1].players.map(({ elo, name }) => ({ elo, name})))
-  console.log(division.teams[1].avg)
-  console.log(division.teams[1].elo)
+  return { division }
 }
-
-
-//makeTeams Cool_ $1900 song Dibu netqu rams

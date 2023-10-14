@@ -1,2 +1,3 @@
 node_modules/
-nabs.sqlite
+*.sqlite
+dist/
