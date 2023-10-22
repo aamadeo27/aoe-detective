@@ -46,7 +46,7 @@ export default async function whothisnab(say: (comment: string) => void, name: s
   
   try {
     for(let i = 0; i < response.length ; i++) {
-      if ( i === 2 ) {
+      if ( i === 4 ) {
         say(`and ${response.length - i} more`)
         break
       }

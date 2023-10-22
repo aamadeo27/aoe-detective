@@ -6,10 +6,10 @@ import helpCommand from './commands/help'
 import syncerCommand from './commands/syncer'
 import addnoteCommand from './commands/addnote'
 import delnotecommand from './commands/delnote'
-
+import secrets from '../secrets.json'
 
 const CLIENT_ID = '1075851918921978026'
-const CLIENT_TOKEN = 'MTA3NTg1MTkxODkyMTk3ODAyNg.GFBUc3.PMrhZxT5nZG57-qpXGJVBvv7Ehsjo-ZsERlgLo'
+const CLIENT_TOKEN = secrets.discord.client_token
 const GUILD_ID = '1075803410022010900'
 const HISTORY_CHANNEL_ID = '1075864498797281322'
 const GENERAL_CHANNEL_ID = '1075803410621792388'

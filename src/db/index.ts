@@ -203,6 +203,13 @@ const dao = {
 
   getNotes(nabId: number) {
     return db.all(`select * from notes where nab_id = ?`, nabId)
+  },
+
+  async addTwitchNab(username: string, userid: string) {
+    const nab = await db.get(`select * from twitch_nabs where id = ? and username = ?`, userid, username)
+    if (nab) return
+    console.log('Adding: ', username)
+    return db.run(`insert into twitch_nabs values (?,?)`, userid, username)
   }
 }
 
