@@ -2,10 +2,10 @@
         
 import { removeAccents } from "@/logic/common"
 import { AxiosError } from "axios"
-import { PromisedDatabase } from "promised-sqlite3"
+import { AsyncDatabase  } from "promised-sqlite3"
 import { fetchPlayers } from "../aoe-api"
 
-const db = new PromisedDatabase()
+let db = null
 
 const REGIONS = {
   0: 'Europe',
@@ -21,7 +21,8 @@ const REGIONS = {
 
 const dao = {
   async init(callback?) {
-    await db.open("./nabs.sqlite") // create a sqlite3.Database object & open the database on the passed filepath.
+    db = await AsyncDatabase.open("./nabs.sqlite")
+    await // create a sqlite3.Database object & open the database on the passed filepath.
     
     // run some sql request.
     await db.run("CREATE TABLE IF NOT EXISTS nabs (id INTEGER PRIMARY KEY, elo INTEGER, avatar TEXT NOT NULL, last_page INTEGER DEFAULT 1, region text, syncer boolean default false);")
@@ -32,6 +33,7 @@ const dao = {
     await db.run("CREATE INDEX IF NOT EXISTS nabs_games_nab_idx on nabs_games( nab_id )")
     await db.run("CREATE TABLE IF NOT EXISTS games (game_id TEXT PRIMARY KEY, data TEXT)")
     await db.run("CREATE TABLE IF NOT EXISTS notes (nab_id INTEGER, note_id INTEGER, note TEXT, PRIMARY KEY (nab_id, note_id))")
+    await db.run("CREATE TABLE IF NOT EXISTS twitch_nabs (id text, username text)")
 
     if (callback) callback()
   },

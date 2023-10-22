@@ -2,3 +2,4 @@ node_modules/
 *.sqlite
 dist/
 src/secrets.json
+src/twitchbot/config.json

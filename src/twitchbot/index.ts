@@ -3,6 +3,7 @@ import config from './config.json'
 import { twitch } from '../secrets.json'
 import whothisnab from './commands/whothisnab'
 import pickmap from './commands/pickmap'
+import tg from './commands/tg'
 import dao from '@/db'
 
 const nabsCache = {}
@@ -11,7 +12,6 @@ const identity = {
   username: config.username,
   password: twitch.password,
 }
-console.log(identity)
 const client = tmi.Client({ identity, channels: config.channels })
 
 client.connect()
@@ -25,6 +25,7 @@ client.connect()
   .catch(console.error)
 
 const commands = {
+  tg,
   whothisnab,
   pickmap,
 }

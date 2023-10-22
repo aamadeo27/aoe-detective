@@ -119,3 +119,8 @@ export const makeTeams = async (list: string) => {
 
   return { division }
 }
+
+export const makeTeamsAnonymous = (list: string) => {
+  const newList = '$' + list.trim().replace(/\s+/g, ' $')
+  return makeTeams(newList)
+}
