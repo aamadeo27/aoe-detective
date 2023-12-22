@@ -18,7 +18,8 @@ export async function fetchPlayers(search: string = ''){
       }
     ).then(response => {
       const playerList = response.data.items
-        ?.map(({ avatarUrl, elo, rlUserId, userName, region }) => ({ avatarUrl, elo, rlUserId, userName, region }))
+        ?.map(({ avatarUrl, elo, rlUserId, userName, region, wins, losses, rank, winStreak }) => 
+          ({ avatarUrl, elo, rlUserId, userName, region, wins, losses, rank, streak: winStreak }))
         .sort((a,b) => b.elo - a.elo)
         .forEach(p => {
           if (p) players.push(p)

@@ -26,12 +26,14 @@ client.connect()
 
 const commands = {
   tg,
+  wtn: whothisnab,
   whothisnab,
   pickmap,
 }
 
 
 client.on('message', (channel, tags, message, self) => {
+  console.log(tags)
   if (!nabsCache[tags.username] && !self) {
     dao.addTwitchNab(tags.username, tags['user-id'])
     nabsCache[tags.username] = tags['user-id']

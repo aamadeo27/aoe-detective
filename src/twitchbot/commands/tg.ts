@@ -9,6 +9,10 @@ export default async function tg(say: (comment: string) => void, data: string) {
         return say(`${data} is invalid. It should be an even number of players`)
     }
 
+    if (data.split(' ').map(e => parseInt(e)).find(e => e > 5000)) {
+      return say(`Check input, apparently one player has more than 5k elo`)
+    }
+
     const teamData = await makeTeamsAnonymous(data)
 
     console.log(teamData)

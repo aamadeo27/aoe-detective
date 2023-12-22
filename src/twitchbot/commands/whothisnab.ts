@@ -1,7 +1,7 @@
 import dao from "@/db"
 import { getNab } from "@/logic/common"
 
-
+const pct = (w ,l) => isNaN(w) || isNaN(l) ? '--' : Math.floor((w / (w+l))*10000)/100
 const wait = (n: number) => new Promise(r => setTimeout(r,n))
 
 export default async function whothisnab(say: (comment: string) => void, name: string) {
@@ -52,7 +52,16 @@ export default async function whothisnab(say: (comment: string) => void, name: s
       }
 
       const nab = response[i]
-      say(`[${nab.id}] ${nab.currentName} - Other Names: ${nab.names.join(', ')} - ELO: ${nab.elo} - Region: ${nab.region ?? ''} - Notes: ${nab.notes.map(({ note }) => note).join('. ')}`)
+      const message = `[${nab.id}] ${nab.currentName} - 
+        All Names: ${nab.names.join(', ')} - 
+        W/L: ${!nab.wins ? '--' : `${nab.wins}/${nab.losses} (${nab.wins+nab.losses})`} -
+        WINRATE: ${pct(nab.wins, nab.losses)}% -
+        WINSTREAK: ${nab.streak ?? '--'} -
+        RANK: ${nab.rank ?? '--'} -
+        ELO: ${nab.elo} - Region: ${nab.region ?? ''} - 
+        Notes: ${nab.notes.map(({ note }) => note).join('. ')} -
+        Syncer? ${nab.syncer ? 'Yes' : 'Not that we know'}`
+      say(message)
       await wait(2000)
 
       

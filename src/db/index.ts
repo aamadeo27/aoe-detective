@@ -25,7 +25,7 @@ const dao = {
     await // create a sqlite3.Database object & open the database on the passed filepath.
     
     // run some sql request.
-    await db.run("CREATE TABLE IF NOT EXISTS nabs (id INTEGER PRIMARY KEY, elo INTEGER, avatar TEXT NOT NULL, last_page INTEGER DEFAULT 1, region text, syncer boolean default false);")
+    await db.run("CREATE TABLE IF NOT EXISTS nabs (id INTEGER PRIMARY KEY, elo INTEGER, avatar TEXT NOT NULL, last_page INTEGER DEFAULT 1, region text, syncer boolean default false, wins INTEGER, losses INTEGER, rank INTEGER, streak INTEGER);")
     await db.run("CREATE TABLE IF NOT EXISTS nabs_names (id INTEGER, name TEXT, added_at DATE, current boolean default false, name_idx TEXT, PRIMARY KEY (id, name))")
     await db.run("CREATE INDEX IF NOT EXISTS nabs_names_idx_name on nabs_names( name )")
     await db.run("CREATE INDEX IF NOT EXISTS nabs_names_idx_name_idx on nabs_names( name_idx )")
@@ -46,7 +46,7 @@ const dao = {
       if (post) post(`\`${new Date().toUTCString()}\` New Player: **${p.name}** ${p.elo}`)
 
       console.log(`[${new Date().toUTCString()}]`,'New Player: ', p.name, p.elo)
-      await db.run('insert into nabs (id, elo, avatar, last_page, region, syncer) values (?,?,?,0,?, false)', p.id, p.elo, p.avatarUrl, REGIONS[p.region])
+      await db.run('insert into nabs (id, elo, avatar, last_page, region, syncer, wins, losses, rank, streak) values (?,?,?,0,?, false, ?, ?, ?, ?)', p.id, p.elo, p.avatarUrl, REGIONS[p.region], p.wins, p.losses, p.rank, p.streak)
       await db.run('insert into nabs_names (id, name, added_at, current, name_idx) values (?,?,?,?,?)', p.id, p.name, new Date(), true, removeAccents(p.name))
 
       return true
@@ -54,7 +54,7 @@ const dao = {
 
     const names = (await dao.getNamesById(p.id)).map(n => n.name)
 
-    await db.run('update nabs set elo = ?, region = ? where id = ?', p.elo, REGIONS[p.region], p.id)
+    await db.run('update nabs set elo = ?, region = ?, wins = ?, losses = ?, rank = ?, streak = ? where id = ?', p.elo, REGIONS[p.region], p.wins, p.losses, p.rank, p.streak, p.id)
     
     if (!names.includes(p.name)) {
       if (post && p.id !== 5127369) post(`\`${new Date().toUTCString()}\` New Name: #${p.id} **${p.name}** older names: ${names.map(n => `_${n}_`).join(', ')}`)

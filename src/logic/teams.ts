@@ -34,8 +34,9 @@ const evalTeams = (selector, players: Player[]) => {
   });
 
 
+  const t1 = selector[0] 
   const division = {
-      selector: selector.map( i => i+1 ).join(''),
+      selector: selector.map( i => i === t1 ? 1 : 2 ).join(''),
       selector2: `${
         selector.map((v,i) => v === 0 ? i+1 : '').join('')} vs ${
         selector.map((v,i) => v === 1 ? i+1 : '').join('')

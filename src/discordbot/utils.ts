@@ -1,5 +1,7 @@
 import { EmbedBuilder } from "discord.js"
 
+const pct = (w ,l) => isNaN(w) || isNaN(l) ? '--' : Math.floor((w / (w+l))*10000)/100
+
 export const embedNab = nab => {
   const name = nab.currentName
   const names = nab.names.join(', ')
@@ -14,6 +16,10 @@ export const embedNab = nab => {
         { name: 'ID', value: `${nab.id}`, inline: true},
         { name: 'ELO', value: `${nab.elo}`, inline: true },
         { name: 'Region', value: `${nab.region ?? 'no-region'}`, inline: true },
+        { name: 'W/L', value: !nab.wins ? '--':  `${nab.wins}/${nab.losses} (${nab.wins+nab.losses})`, inline: false },
+        { name: 'Win Streak', value: ''+ ( nab.streak ?? '--'), inline: true },
+        { name: 'WinRate', value: `${pct(nab.wins, nab.losses)}%`, inline: true },
+        { name: 'Rank', value: ''+ (nab.rank ?? '--'), inline: true },
         { name: 'Syncer', value: ( nab.syncer ? 'true' : 'false'), inline: true },
       ])
 
