@@ -42,6 +42,7 @@ export async function fetchMatchlist(nabId: number, savedMatches: Set<string>, f
   while (true){
     let tries = 0
     try {
+      console.log('Fetching Page: ', page)
       let response = await axios.post(
         'https://api.ageofempires.com/api/AgeDE/getmpmatchlist',
         {
@@ -54,7 +55,7 @@ export async function fetchMatchlist(nabId: number, savedMatches: Set<string>, f
           sortDirection: "ASC",
           page,
           recordCount: 10,
-          matchType: null
+          matchType: "2"
         }
       )
       response.data.matchList?.map( match => {
@@ -68,7 +69,7 @@ export async function fetchMatchlist(nabId: number, savedMatches: Set<string>, f
 
       page++;
 
-      await new Promise((r) => setTimeout(r, 100)) 
+      await new Promise((r) => setTimeout(r, 50)) 
       tries = 0
     } catch(error){
       console.log('Error while getting match list try #', tries)

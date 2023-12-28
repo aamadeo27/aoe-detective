@@ -1,9 +1,10 @@
 import { exit } from "process"
 import * as readline from 'readline'
 import dao from "./db"
-import { fetchMatchDetail, fetchMatchlist } from "./aoe-api"
 import { makeTeams } from '@/logic/teams'
 import { getNab, updateNameIndex } from "./logic/common"
+import { updateNabGames } from "./logic/playerGames"
+
 
 const conflict = (name, accounts) => `Conflicts with name ${name}:\n${accounts.map(n => `#${n.id} ${n.name}`).join(', ')}`
 
@@ -57,6 +58,8 @@ const commands = {
   },
 
   tg: makeTeams,
+
+  updateNabGames,
 }
 
 const rl = readline.createInterface({ input: process.stdin, output: process.stdout })

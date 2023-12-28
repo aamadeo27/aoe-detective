@@ -52,13 +52,13 @@ export default async function whothisnab(say: (comment: string) => void, name: s
       }
 
       const nab = response[i]
+      const names = nab.names.slice(0,5).join(', ')
+      const steamAccount = nab.avatar.match(/avatars.steamstatic.com/)
       const message = `[${nab.id}] ${nab.currentName} - 
-        All Names: ${nab.names.join(', ')} - 
-        W/L: ${!nab.wins ? '--' : `${nab.wins}/${nab.losses} (${nab.wins+nab.losses})`} -
-        WINRATE: ${pct(nab.wins, nab.losses)}% -
-        WINSTREAK: ${nab.streak ?? '--'} -
-        RANK: ${nab.rank ?? '--'} -
-        ELO: ${nab.elo} - Region: ${nab.region ?? ''} - 
+        ${steamAccount ? 'Steam' : 'XBOX' }- ${names} - 
+        ${!nab.wins ? '--' : `${nab.wins}/${nab.losses} (${nab.wins+nab.losses})`} -
+        ${pct(nab.wins, nab.losses)}% ${nab.streak ?? '--'} -
+        #${nab.rank ?? '--'} - ELO:${nab.elo} - ${nab.region ?? ''} - 
         Notes: ${nab.notes.map(({ note }) => note).join('. ')} -
         Syncer? ${nab.syncer ? 'Yes' : 'Not that we know'}`
       say(message)
