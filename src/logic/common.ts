@@ -2,7 +2,10 @@ import dao from "../db"
 
 export const removeAccents = s => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 
-export const getNab = async (name: string, i?: number, current?) => name.match(/^\".+\"$/) 
+export const getNab = async (name: string, i?: number, current?) => name.match(/^\$(T|G)$/) 
+  ? [{ name: 'Vagabundo' + (i+1), elo: name === '$T' ? 1800 : 1700 }]
+  : name.match(/^\".+\"$/) 
+
   ? dao.getNabByName(name.substring(1, name.length-1))
   : name.match(/^#.+$/) // if by ID using #ID
 

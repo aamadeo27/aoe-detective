@@ -1,7 +1,7 @@
 import { exit } from "process"
 import * as readline from 'readline'
 import dao from "./db"
-import { makeTeams } from '@/logic/teams'
+import { makeTeams, makeTeamsAnonymous } from '@/logic/teams'
 import { getNab, updateNameIndex } from "./logic/common"
 import { updateNabGames } from "./logic/playerGames"
 
@@ -57,7 +57,7 @@ const commands = {
     return details.map(({ game_id, data }) => ({ game_id, data: JSON.parse(data) }))
   },
 
-  tg: makeTeams,
+  tg: makeTeamsAnonymous,
 
   updateNabGames,
 }

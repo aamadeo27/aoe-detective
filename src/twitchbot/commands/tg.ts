@@ -1,7 +1,7 @@
 import { makeTeamsAnonymous } from "@/logic/teams"
 
 export default async function tg(say: (comment: string) => void, data: string) {
-    if (data.match(/[^0-9\s]/g)) {
+    if (data.match(/[^0-9\sTG]/g)) {
         return say(`${data} is invalid. It should only be space separated numbers. Example: 2500 2300 2200 1899 1774 1600`)
     }
 

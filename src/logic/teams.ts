@@ -3,12 +3,14 @@ import { getNab } from "./common"
 
 type Player = {
   elo: number
+  name: string
 }
 
 const evalTeams = (selector, players: Player[]) => {
+
   const teams = [
-    { elo: 0, players: [], sqAvg: 0, avg: 0, variance: 0, std: 0 },
-    { elo: 0, players: [], sqAvg: 0, avg: 0, variance: 0, std: 0 }
+    { elo: 0, players: [], sqAvg: 0, avg: 0, variance: 0, std: 0, vagabundos: 0 },
+    { elo: 0, players: [], sqAvg: 0, avg: 0, variance: 0, std: 0, vagabundos: 0 }
   ]
 
   const maxDiff = 
@@ -19,7 +21,13 @@ const evalTeams = (selector, players: Player[]) => {
   selector.forEach( (t,p) => {
       teams[t].players.push({ ...players[p], position: p })
       teams[t].elo += players[p].elo
+      
+      teams[t].vagabundos += players[p].name === 'Vagabundo' ? 1 : 0
   })
+
+  if (teams[0].vagabundos > 1 || teams[1].vagabundos > 1) {
+    return { tooManyVagabundos: true }
+  }
 
   teams.forEach( team => {
       const n = team.players.length
@@ -47,6 +55,7 @@ const evalTeams = (selector, players: Player[]) => {
       stdDiff: Math.abs(teams[0].std - teams[1].std),
       maxDiff,
       isBetterThan: null,
+      tooManyVagabundos: false,
   }
 
   division.isBetterThan = d => {
@@ -81,6 +90,8 @@ const teamsFromPlayers = (players: Player []) => {
           if ( i === selector.length - 1 && numBalance === 0 ) {
               const division = evalTeams(selector, players);
 
+              if (division.tooManyVagabundos) continue
+
               bestDivision = bestDivision !== null && bestDivision.isBetterThan(division)
                   ? bestDivision
                   : division;
@@ -102,7 +113,6 @@ export const makeTeams = async (list: string) => {
     names.map(n => getNab(n, 0, true)) // just by name
   )
 
-
   const playerList = result.map( (r: any, i) => {
 
     if (!r) return errors.push(`${names[i]} was not found`)
@@ -122,6 +132,9 @@ export const makeTeams = async (list: string) => {
 }
 
 export const makeTeamsAnonymous = (list: string) => {
-  const newList = '$' + list.trim().replace(/\s+/g, ' $')
-  return makeTeams(newList)
+  const newList = '$' + list.trim().replace(/\s+/g, ' $')  
+  const teams = makeTeams(newList)
+
+
+  return teams
 }
