@@ -22,7 +22,7 @@ const evalTeams = (selector, players: Player[]) => {
       teams[t].players.push({ ...players[p], position: p })
       teams[t].elo += players[p].elo
       
-      teams[t].vagabundos += players[p].name === 'Vagabundo' ? 1 : 0
+      teams[t].vagabundos += players[p].name.match(/^Vagabundo\d+/) ? 1 : 0
   })
 
   if (teams[0].vagabundos > 1 || teams[1].vagabundos > 1) {
@@ -40,7 +40,6 @@ const evalTeams = (selector, players: Player[]) => {
           
       team.std = Math.sqrt( team.variance )
   });
-
 
   const t1 = selector[0] 
   const division = {
