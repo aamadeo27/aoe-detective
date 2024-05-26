@@ -42,7 +42,7 @@ const evalTeams = (selector, players: Player[]) => {
   });
 
   const t1 = selector[0] 
-  const division = {
+  const division: Record<string, any> = {
       selector: selector.map( i => i === t1 ? 1 : 2 ).join(''),
       selector2: `${
         selector.map((v,i) => v === 0 ? i+1 : '').join('')} vs ${
@@ -50,7 +50,7 @@ const evalTeams = (selector, players: Player[]) => {
       }`,
       teams,
       sqDiff: Math.abs(teams[0].sqAvg - teams[1].sqAvg),
-      diff: Math.abs(teams[0].avg - teams[1].avg),
+      diff: Math.abs(teams[0].elo - teams[1].elo),
       stdDiff: Math.abs(teams[0].std - teams[1].std),
       maxDiff,
       isBetterThan: null,
@@ -66,7 +66,7 @@ const evalTeams = (selector, players: Player[]) => {
 
   return division
 }
-
+//tg 2857 1821 2782 2883 1864 1633 1535 1664
 const teamsFromPlayers = (players: Player []) => {
   if ( players.length % 2 === 1 ) return null;
 
@@ -87,8 +87,8 @@ const teamsFromPlayers = (players: Player []) => {
           remainder = Math.floor(newValue/2);
 
           if ( i === selector.length - 1 && numBalance === 0 ) {
-              const division = evalTeams(selector, players);
-
+              const division = evalTeams(selector, players)
+              console.log(division.selector, division.diff)
               if (division.tooManyVagabundos) continue
 
               bestDivision = bestDivision !== null && bestDivision.isBetterThan(division)
@@ -99,6 +99,8 @@ const teamsFromPlayers = (players: Player []) => {
 
       k++;
   }
+
+  console.log(bestDivision.teams)
 
   return bestDivision;
 }

@@ -20,8 +20,10 @@ const REGIONS = {
 
 
 const dao = {
+  db,
   async init(callback?) {
     db = await AsyncDatabase.open("./nabs.sqlite")
+    dao.db = db
     await // create a sqlite3.Database object & open the database on the passed filepath.
     
     // run some sql request.

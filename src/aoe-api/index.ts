@@ -7,6 +7,8 @@ export async function fetchPlayers(search: string = ''){
   const players = []
   const pages = []
 
+  console.log('Fetch Players')
+
   for( let page = 1 ; page <= MAX_PAGES; page++){
     pages.push( axios.post(
       'https://api.ageofempires.com/api/v2/agede/Leaderboard',

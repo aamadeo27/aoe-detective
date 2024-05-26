@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model NabName {
+  id       Int @id @default(autoincrement())
+  nab_id   Int
+  name_idx String
+  name     String
+  added_at DateTime
+  current  Boolean  @default(false)
+
+  nab      Nab  @relation(fields: [nab_id], references: [id])
+
+  @@map("nabs_names")
+  @@index([name_idx])
+}
+
+model Nab {
+  id        Int @id
+  elo       Int
+  avatar    String
+  last_page Int @default(1)
+  region    String
+  syncer    Boolean @default(false)
+  wins      Int
+  losses    Int
+  rank      Int
+  streak    Int
+
+  names     NabName[]
+
+  @@map("nabs")
+}
+
+model Note {
+  id     Int @id @default(autoincrement())
+  nab_id Int
+  note   String
+
+  @@map("notes")
+  @@index([nab_id])
+}
+
+model TwitchNab {
+  id        String @id
+  username  String
+
+  @@map("twitch_nabs")
+}
+
+model NabGame {
+  game_id String
+  nab_id  String
+
+  @@unique([game_id, nab_id])
+  @@index([nab_id])
+  @@index([game_id])
+  @@map("nab_games")
+}
+
+model Game {
+  id    String @id
+  data  String
+
+  @@map("games")
+}
+
