@@ -3,3 +3,4 @@ node_modules/
 dist/
 src/secrets.json
 src/twitchbot/config.json
+.env
