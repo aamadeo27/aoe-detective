@@ -2,7 +2,7 @@ import dao from '@/db'
 import axios, { AxiosError } from 'axios'
 const MAX_PAGES = 7
 
-export async function fetchPlayers(search: string = ''){
+export async function fetchPlayers(searchPlayer: string = ''){
 
   const players = []
   const pages = []
@@ -13,10 +13,14 @@ export async function fetchPlayers(search: string = ''){
     pages.push( axios.post(
       'https://api.ageofempires.com/api/v2/agede/Leaderboard',
       { 
-        region:"7",
-        matchType:"2",
+        consoleMatchType: 15,
+        count: 100,
+        matchType: "2",
         page,
-        search,
+        region: "7",
+        searchPlayer,
+        sortColumn: "rank",
+        sortDirection: "ASC"
       }
     ).then(response => {
       const playerList = response.data.items
