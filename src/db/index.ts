@@ -5,6 +5,8 @@ import { AxiosError } from "axios"
 import { AsyncDatabase  } from "promised-sqlite3"
 import { fetchPlayers } from "../aoe-api"
 
+const MIN = 60 * 1000
+
 let db = null
 
 const REGIONS = {
@@ -16,8 +18,6 @@ const REGIONS = {
   5: 'Oceania',
   6: 'Africa',
 }
-
-
 
 const dao = {
   db,
@@ -54,21 +54,29 @@ const dao = {
       return true
     }
 
-    const names = (await dao.getNamesById(p.id)).map(n => n.name)
+    const names = (await dao.getNamesById(p.id))
 
     await db.run('update nabs set elo = ?, region = ?, wins = ?, losses = ?, rank = ?, streak = ? where id = ?', p.elo, REGIONS[p.region], p.wins, p.losses, p.rank, p.streak, p.id)
     
-    if (!names.includes(p.name)) {
-      if (post && p.id !== 5127369) post(`\`${new Date().toUTCString()}\` New Name: #${p.id} **${p.name}** older names: ${names.map(n => `_${n}_`).join(', ')}`)
-      console.log(`[${new Date().toUTCString()}] #${p.id} New Name:  **${p.name}** other names: ${names.map(n => `_${n}_`).join(', ')}`)
+    const otherNames = names.map(n => `_${n.name}_`).join(', ')
+    if (!names.find((n) => n.name == p.name)) {
+      if (post && p.id !== 5127369) {
+        post(`\`${new Date().toUTCString()}\` New Name: #${p.id} **${p.name}** older names: ${otherNames}`)
+      }
+      console.log(`[${new Date().toUTCString()}] #${p.id} New Name:  **${p.name}** other names: ${otherNames}`)
       await db.run('insert into nabs_names (id, name, added_at, current, name_idx) values (?,?,?,?,?)', p.id, p.name, new Date(), true, removeAccents(p.name))
       await db.run('update nabs_names set current = false where name <> ? and id = ?', p.name, p.id)
 
       return true
 
-    } else if (names[0] !== p.name) {
-      if (post && p.id !== 5127369 ) post(`[${new Date().toUTCString()}] #${p.id} Back to:  **${p.name}** other names: ${names.map(n => `_${n}_`).join(', ')}`)
-      console.log(`\`[${new Date().toUTCString()}]\` #${p.id} Back to:  **${p.name}** other names: ${names.map(n => `_${n}_`).join(', ')}`)
+    } else if (names[0].name !== p.name) {
+      const nameAge = Date.now() - new Date(names[0].added_at).getTime()
+
+      if (post && p.id !== 5127369 && nameAge > 10 * MIN) {
+        post(`[${new Date().toUTCString()}] #${p.id} Back to:  **${p.name}** other names: ${otherNames}`)
+        console.log(`[${new Date().toUTCString()}] #${p.id} Back to:  **${p.name}** other names: ${otherNames}`)
+      }
+
       await db.run('update nabs_names set added_at = ?, current = true where id = ? and name = ?', new Date(), p.id, p.name)
       await db.run('update nabs_names set current = false where name <> ? and id = ?', p.name, p.id)
 
