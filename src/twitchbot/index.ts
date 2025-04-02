@@ -26,8 +26,9 @@ client.connect()
 
 const commands = {
   tg,
-  wtn: whothisnab,
-  whothisnab,
+  wtfn: (say: (comment: string) => void, name: string) => whothisnab(say, name, true),
+  wtn: (say: (comment: string) => void, name: string) => whothisnab(say, name, false),
+  whothisnab: (say: (comment: string) => void, name: string) => whothisnab(say, name, false),
   pickmap,
 }
 

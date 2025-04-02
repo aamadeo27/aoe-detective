@@ -4,7 +4,7 @@ import { getNab } from "@/logic/common"
 const pct = (w ,l) => isNaN(w) || isNaN(l) ? '--' : Math.floor((w / (w+l))*10000)/100
 const wait = (n: number) => new Promise(r => setTimeout(r,n))
 
-export default async function whothisnab(say: (comment: string) => void, name: string) {
+export default async function whothisnab(say: (comment: string) => void, name: string, current: boolean = false) {
 
   console.log(name)
 
@@ -13,7 +13,7 @@ export default async function whothisnab(say: (comment: string) => void, name: s
     return
   }
 
-  let data = await getNab(name, 0, false)
+  let data = await getNab(name, 0, current)
   if (!data) return undefined
 
   const ids = new Set()
@@ -30,9 +30,9 @@ export default async function whothisnab(say: (comment: string) => void, name: s
       console.log(nab)
       
       return {
-        currentName: names.find(n => n.current)?.name ?? null,
+        currentName: names.find(n => n.current)!.name,
         ...nab,
-        names: names.map(d => d.name),
+        names: names.sort((a,b) => b.added_at - a.added_at ).map(d => d.name),
         notes,
       }
     })

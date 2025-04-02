@@ -88,7 +88,7 @@ const dao = {
 
   allNames() {
     return db.all('select * from nabs_names')
-  },
+  },  
 
   updateNameIdx(nab) {
     return db.run('update nabs_names set name_idx = ? where name = ? and id = ?', [nab.name_idx, nab.name, nab.id])
@@ -105,7 +105,7 @@ const dao = {
       FROM nabs n, nabs_names nn
       WHERE name_idx like ? and n.id = nn.id
     ${ current ? ' and current ': ''}
-      ORDER BY nn.added_at ASC`
+      ORDER BY nn.added_at DESC`
 
     return await db.all(sql, arg)
   },
