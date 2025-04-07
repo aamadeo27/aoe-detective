@@ -35,7 +35,7 @@ export default async function whothisnab(say: (comment: string) => void, name: s
     return
   }
 
-  let data = await getNab(name, 0, false)
+  let data = await getNab(name, 0, current)
   if (!data) return undefined
 
   const ids = new Set()
@@ -52,9 +52,9 @@ export default async function whothisnab(say: (comment: string) => void, name: s
       console.log(nab)
       
       return {
-        currentName: names.find(n => n.current)?.name ?? null,
+        currentName: names.find(n => n.current)!.name,
         ...nab,
-        names: names.map(d => d.name),
+        names: names.sort((a,b) => b.added_at - a.added_at ).map(d => d.name),
         notes,
       }
     })
