@@ -4,6 +4,28 @@ import { getNab } from "@/logic/common"
 const pct = (w ,l) => isNaN(w) || isNaN(l) ? '--' : Math.floor((w / (w+l))*10000)/100
 const wait = (n: number) => new Promise(r => setTimeout(r,n))
 
+function shortDate(timestamp){
+  return new Date(timestamp).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: '2-digit'
+  })
+}
+
+function streak(s){
+  if (!s) return ''
+  if (s < 0) return `NotLikeThis ${-s}`
+  return `CurseLit ${s}`
+}
+
+function games(g) {
+  if (g < 100) return 'Kappa'
+  if (g < 500) return 'RalpherZ'
+  if (g < 2000) return 'CorgiDerp'
+  if (g < 10000) return 'CoolCat'
+  return 'CaitlynS'
+}
+
 export default async function whothisnab(say: (comment: string) => void, name: string, current: boolean = false) {
 
   console.log(name)
@@ -53,14 +75,17 @@ export default async function whothisnab(say: (comment: string) => void, name: s
 
       const nab = response[i]
       const names = nab.names.slice(0,5).join(', ')
+      const notes = nab.notes.length > 0 ? `Notes: ${nab.notes.map(({ note }) => note).join('. ')}` : ''
       const steamAccount = nab.avatar.match(/avatars.steamstatic.com/)
-      const message = `[${nab.id}] ${nab.currentName} - 
-        ${steamAccount ? 'Steam' : 'XBOX' }- ${names} - 
-        ${!nab.wins ? '--' : `${nab.wins}/${nab.losses} (${nab.wins+nab.losses})`} -
-        ${pct(nab.wins, nab.losses)}% ${nab.streak ?? '--'} -
+      const message = `${games(nab.wins+nab.losses)} (${nab.wins+nab.losses}) ${nab.currentName}
+        [${shortDate(nab.added_at)}] - 
+        ${steamAccount ? 'Steam' : 'Xbox' } - ${names} - 
+        ${!nab.wins ? '--' : `${nab.wins}/${nab.losses}`} -
+        ${pct(nab.wins, nab.losses)}% ${streak(nab.streak)} -
         #${nab.rank ?? '--'} - ELO:${nab.elo} - ${nab.region ?? ''} - 
-        Notes: ${nab.notes.map(({ note }) => note).join('. ')} -
-        Syncer? ${nab.syncer ? 'Yes' : 'Not that we know'}`
+        ${notes}
+        ${nab.syncer ? '- Syncer ' : ''}
+        `
       say(message)
       await wait(2000)
 
