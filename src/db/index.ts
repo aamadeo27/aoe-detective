@@ -133,6 +133,7 @@ const dao = {
 
     return {
       ...nab,
+      added_at: actual.added_at,
       name: actual.name,
     }
   },
