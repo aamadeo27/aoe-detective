@@ -1,8 +1,7 @@
 import dao from "@/db"
-import { getNab } from "@/logic/common"
+import { getNab, wait } from "@/logic/common"
 
 const pct = (w ,l) => isNaN(w) || isNaN(l) ? '--' : Math.floor((w / (w+l))*10000)/100
-const wait = (n: number) => new Promise(r => setTimeout(r,n))
 
 function shortDate(timestamp){
   return new Date(timestamp).toLocaleDateString('en-US', {

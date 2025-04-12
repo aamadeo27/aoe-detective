@@ -151,6 +151,19 @@ const dao = {
         order by added_at desc`, id)
   },
 
+  async getNabsAround(bottom: number, top: number) {
+    return await db.all(
+      `select n.*, nn.name
+         from nabs n, nabs_names nn
+        where n.elo between ? and ?
+          and nn.id = n.id
+          and nn.current
+        order by elo desc
+      `,
+      [bottom, top]
+    )
+  },
+
   async updateDB(post?){
     try {
       const players = await fetchPlayers()
