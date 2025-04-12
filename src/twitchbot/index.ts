@@ -5,6 +5,7 @@ import whothisnab from './commands/whothisnab'
 import pickmap from './commands/pickmap'
 import tg from './commands/tg'
 import dao from '@/db'
+import nabsin from './commands/nabsin'
 
 const nabsCache = {}
 
@@ -30,6 +31,7 @@ const commands = {
   wtn: (say: (comment: string) => void, name: string) => whothisnab(say, name, false),
   whothisnab: (say: (comment: string) => void, name: string) => whothisnab(say, name, false),
   pickmap,
+  nabsin,
 }
 
 

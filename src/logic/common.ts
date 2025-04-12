@@ -26,3 +26,5 @@ export const updateNameIndex = async () => {
     await dao.updateNameIdx(names[n])
   }
 }
+
+export const wait = (n: number) => new Promise(r => setTimeout(r,n))
