@@ -1,6 +1,7 @@
 node_modules/
-*.sqlite
 dist/
+data/*.sqlite
 src/secrets.json
 src/twitchbot/config.json
 .env
+.terraform*

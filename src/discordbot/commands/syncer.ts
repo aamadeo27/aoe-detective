@@ -1,5 +1,5 @@
-import dao from "@/db";
-import { getNab } from "@/logic/common";
+import dao from "../../db";
+import { getNab } from "../../logic/common";
 import { SlashCommandBuilder } from "discord.js";
 import { embedNab } from "../utils";
 

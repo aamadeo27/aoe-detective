@@ -1,5 +1,5 @@
-import { fetchMatchlist } from "@/aoe-api"
-import dao from "@/db"
+import { fetchMatchlist } from "../aoe-api"
+import dao from "../db"
 import { getNab } from "./common"
 
 export async function updateNabGames(nabId){

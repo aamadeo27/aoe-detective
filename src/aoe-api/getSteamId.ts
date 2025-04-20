@@ -1,4 +1,4 @@
-let axios = require('axios')
+import axios from 'axios'
 
 //create axios instance from which we will get to the search list
 let instance = axios.create({ baseURL: 'https://steamcommunity.com' })

@@ -1,5 +1,4 @@
-import dao from '@/db'
-import pgDao from '@/db/pgDao'
+import dao from '../db'
 import { Client, Events, GatewayIntentBits, REST, Routes } from 'discord.js'
 import whothisnabCommand from './commands/whothisnab'
 import makeTeamsCommand from './commands/maketeams'
@@ -7,22 +6,15 @@ import helpCommand from './commands/help'
 import syncerCommand from './commands/syncer'
 import addnoteCommand from './commands/addnote'
 import delnotecommand from './commands/delnote'
-import secrets from '../secrets.json'
+import { discord as config } from '../config'
 import features from '../features.json'
 
-const CLIENT_ID = '1075851918921978026'
-const CLIENT_TOKEN = secrets.discord.client_token
-const GUILD_ID = '1075803410022010900'
-const HISTORY_CHANNEL_ID = '1075864498797281322'
-const GENERAL_CHANNEL_ID = '1075803410621792388'
-
-const rest = new REST({ version: '10' }).setToken(CLIENT_TOKEN)
-
+const rest = new REST({ version: '10' }).setToken(config.client_token)
 
 const updateDB = () => {
   const post = async message => {
     try {
-      await rest.post(Routes.channelMessages(HISTORY_CHANNEL_ID), {
+      await rest.post(Routes.channelMessages(config.history_channel_id), {
         body: {
             content: message,
         },
@@ -32,9 +24,7 @@ const updateDB = () => {
     }
   }
 
-  // dao.updateDB()
-  if(features.postgres) pgDao.updateDB(console.log)
-
+  dao.updateDB(post)
 }
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] })
@@ -58,12 +48,12 @@ const commandLibrary = {
 
 function registerCommands(){
   
-  rest.put(Routes.applicationGuildCommands(CLIENT_ID, GUILD_ID), { body: commands })
+  rest.put(Routes.applicationGuildCommands(config.client_id, config.guild_id), { body: commands })
 
   client.on(Events.InteractionCreate, async interaction => {
     if(!interaction.isChatInputCommand()) return
 
-    if (interaction.channelId != GENERAL_CHANNEL_ID) {
+    if (interaction.channelId != config.general_channel_id) {
       await interaction.reply({ content: 'Commands can only be used in General Channel', ephemeral: true })
       return
     }
@@ -98,4 +88,4 @@ client.on(Events.ClientReady, async () => {
 })
 
 
-client.login(CLIENT_TOKEN)
+client.login(config.client_token)

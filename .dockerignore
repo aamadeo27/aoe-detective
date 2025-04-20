@@ -1,0 +1,8 @@
+.env
+dist/
+data/
+node_modules
+nabs.sqlite
+nodemon.json
+yarn*
+.terraform*

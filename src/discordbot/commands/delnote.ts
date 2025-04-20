@@ -1,4 +1,4 @@
-import dao from "@/db";
+import dao from "../../db";
 import { SlashCommandBuilder } from "discord.js";
 
 const delnotecommand = {

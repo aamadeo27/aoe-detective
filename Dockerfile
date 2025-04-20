@@ -1,10 +1,29 @@
-FROM nikolaik/python-nodejs
+FROM node:18-alpine AS builder
 
-RUN mkdir -p /usr/app
+WORKDIR /usr/app
 
-COPY tsconfig.json package.json yarn.lock /usr/app/
-COPY src/ /usr/app/src
-RUN cd /usr/app ; yarn install --frozen-lockfile
-RUN cd /usr/app ; yarn run build
+COPY package*.json ./
+RUN npm install
 
-CMD [ "node","/usr/app/dist/bots.js" ]
+COPY . .
+
+RUN npm run build
+
+RUN npm prune --production
+
+FROM node:18-alpine
+
+WORKDIR /usr/app
+
+COPY --from=builder /usr/app/package*.json ./
+COPY --from=builder /usr/app/node_modules ./node_modules
+COPY --from=builder /usr/app/dist ./dist
+
+RUN mkdir -p data && chown node:node data
+
+USER node
+
+# For Healthcheck
+EXPOSE 3000
+
+CMD [ "node", "dist/main.js" ]

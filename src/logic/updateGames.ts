@@ -1,5 +1,5 @@
-import { fetchMatchDetail, fetchMatchlist } from "@/aoe-api"
-import dao from "@/db"
+import { fetchMatchDetail, fetchMatchlist } from "../aoe-api"
+import dao from "../db"
 import { getNab } from "./common"
 
 async function updateNabGames(nabId){
@@ -15,7 +15,6 @@ async function updateNabGames(nabId){
 
   for(let i = 0 ; i < gameIds.length ; i++) {
     let gameId = gameIds[i] as string
-    console.log('Fetching game: ', gameId)
     const detail = await fetchMatchDetail(gameId, nabId)
 
     const teams = []

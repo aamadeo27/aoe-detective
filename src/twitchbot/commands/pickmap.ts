@@ -1,7 +1,3 @@
-import dao from "@/db"
-import { getNab } from "@/logic/common"
-
-
 const maps = [
   'Highland',
   'Inland',

@@ -1,4 +1,4 @@
-import { makeTeamsAnonymous } from "@/logic/teams"
+import { makeTeamsAnonymous } from "../../logic/teams"
 
 export default async function tg(say: (comment: string) => void, data: string) {
     if (data.match(/[^0-9\sTG]/g)) {
@@ -15,6 +15,6 @@ export default async function tg(say: (comment: string) => void, data: string) {
 
     const teamData = await makeTeamsAnonymous(data)
 
-    console.log(teamData)
+    console.debug(teamData)
     return say(`${teamData.division.selector} - ${teamData.division.selector2} - T1: ${teamData.division.teams[0].elo} T2: ${teamData.division.teams[1].elo} `)
 }

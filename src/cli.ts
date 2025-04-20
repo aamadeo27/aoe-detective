@@ -1,7 +1,7 @@
 import { exit } from "process"
 import * as readline from 'readline'
 import dao from "./db"
-import { makeTeams, makeTeamsAnonymous } from '@/logic/teams'
+import { makeTeamsAnonymous } from './logic/teams'
 import { getNab, updateNameIndex } from "./logic/common"
 import { updateNabGames } from "./logic/playerGames"
 
@@ -32,6 +32,16 @@ const commands = {
         }
       })
     )
+  },
+  nabsin(line: string){
+    let bottom: number, top: number
+    try {
+      [bottom, top] = line.split(' ').map((v) => Number(v))
+    } catch(error) {
+      return
+    }
+
+    return dao.getNabsAround(bottom, top)
   },
 
   getNabLike(name){

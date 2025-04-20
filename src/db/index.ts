@@ -1,9 +1,10 @@
 
         
-import { removeAccents } from "@/logic/common"
+import { removeAccents, requireEnv } from "../logic/common"
 import { AxiosError } from "axios"
 import { AsyncDatabase  } from "promised-sqlite3"
 import { fetchPlayers } from "../aoe-api"
+import { join } from "path"
 
 const MIN = 60 * 1000
 
@@ -14,7 +15,7 @@ const REGIONS = {
   1: 'Middle East',
   2: 'Asia',
   3: 'North America',
-  4: 'Sourth America',
+  4: 'South America',
   5: 'Oceania',
   6: 'Africa',
 }
@@ -22,7 +23,12 @@ const REGIONS = {
 const dao = {
   db,
   async init(callback?) {
-    db = await AsyncDatabase.open("./nabs.sqlite")
+    if (db) return
+
+
+    const dbfile = `${join(__dirname, '../..')}/data/nabs.sqlite`
+    console.log(`DBFILE=${dbfile}`)
+    db = await AsyncDatabase.open(dbfile)
     dao.db = db
     await // create a sqlite3.Database object & open the database on the passed filepath.
     
@@ -105,7 +111,8 @@ const dao = {
       FROM nabs n, nabs_names nn
       WHERE name_idx like ? and n.id = nn.id
     ${ current ? ' and current ': ''}
-      ORDER BY nn.added_at DESC`
+      ORDER BY nn.added_at DESC
+      `
 
     return await db.all(sql, arg)
   },

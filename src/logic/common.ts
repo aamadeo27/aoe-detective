@@ -28,3 +28,9 @@ export const updateNameIndex = async () => {
 }
 
 export const wait = (n: number) => new Promise(r => setTimeout(r,n))
+
+export const requireEnv = (name: string) => {
+  if (!process.env[name]) throw new Error(`Environment Variable ${name} is empty`)
+
+    return process.env[name]
+}

@@ -1,5 +1,5 @@
-import dao from "@/db"
-import { getNab, wait } from "@/logic/common"
+import dao from "../../db"
+import { wait } from "../../logic/common"
 
 export default async function nabsin(say: (comment: string) => void, line: string) {
 

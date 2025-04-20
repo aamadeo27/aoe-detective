@@ -1,4 +1,3 @@
-import dao from '@/db'
 import axios, { AxiosError } from 'axios'
 const MAX_PAGES = 7
 
@@ -6,8 +5,6 @@ export async function fetchPlayers(searchPlayer: string = ''){
 
   const players = []
   const pages = []
-
-  console.log('Fetch Players')
 
   for( let page = 1 ; page <= MAX_PAGES; page++){
     pages.push( axios.post(

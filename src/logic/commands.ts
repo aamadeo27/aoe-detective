@@ -1,5 +1,5 @@
-import dao from "@/db"
-export { makeTeams } from "@/logic/teams"
+import dao from "../db"
+export { makeTeams } from "../logic/teams"
 
 
 // updateDB: () => dao.updateDB(),

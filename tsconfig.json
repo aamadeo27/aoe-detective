@@ -1,8 +1,8 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "target": "es2018",
-    "lib": ["es2018", "esnext.asynciterable"],
+    "target": "es2020",
+    "lib": ["es2020", "esnext.asynciterable"],
     "typeRoots": ["node_modules/@types","src/types"],
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
@@ -20,9 +20,6 @@
     "resolveJsonModule": true,
     "importHelpers": true,
     "baseUrl": "src",
-    "paths": {
-      "@/*": ["*"],
-    }
   },
   "include": ["src/**/*.ts", "src/**/*.json", ".env"],
   "exclude": ["node_modules", "src/http", "src/logs"]

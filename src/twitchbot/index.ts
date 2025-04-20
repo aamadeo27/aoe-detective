@@ -1,17 +1,16 @@
 import tmi from 'tmi.js'
-import config from './config.json'
-import { twitch } from '../secrets.json'
+import { twitch as config } from '../config'
 import whothisnab from './commands/whothisnab'
 import pickmap from './commands/pickmap'
 import tg from './commands/tg'
-import dao from '@/db'
+import dao from '../db'
 import nabsin from './commands/nabsin'
 
 const nabsCache = {}
 
 const identity = {
   username: config.username,
-  password: twitch.password,
+  password: config.password,
 }
 const client = tmi.Client({ identity, channels: config.channels })
 
@@ -36,7 +35,6 @@ const commands = {
 
 
 client.on('message', (channel, tags, message, self) => {
-  console.log(tags)
   if (!nabsCache[tags.username] && !self) {
     dao.addTwitchNab(tags.username, tags['user-id'])
     nabsCache[tags.username] = tags['user-id']
@@ -52,14 +50,12 @@ client.on('message', (channel, tags, message, self) => {
 
   try {
     commands[command]((s: string) => {
-      console.log(s)
+      console.debug(s)
       client.say(channel, s ?? '')
     }, args.join(' ')
     )
   } catch (error) {
     console.error(`${channel}: ${message} : ${tags.username} : ${error}`)
-  }
-
-  
+  }  
 })
 

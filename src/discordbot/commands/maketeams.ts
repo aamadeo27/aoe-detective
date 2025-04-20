@@ -1,4 +1,4 @@
-import { makeTeams } from "@/logic/teams"
+import { makeTeams } from "../../logic/teams"
 import { SlashCommandBuilder } from "discord.js"
 
 const command = {

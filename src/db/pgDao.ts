@@ -1,6 +1,6 @@
 
         
-import { removeAccents } from "@/logic/common"
+import { removeAccents } from "../logic/common"
 import { AxiosError } from "axios"
 import { fetchPlayers } from "../aoe-api"
 import { PrismaClient } from "@prisma/client"
@@ -12,7 +12,7 @@ const REGIONS = {
   1: 'Middle East',
   2: 'Asia',
   3: 'North America',
-  4: 'Sourth America',
+  4: 'South America',
   5: 'Oceania',
   6: 'Africa',
 }

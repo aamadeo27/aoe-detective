@@ -1,5 +1,5 @@
-import dao from "@/db"
-import { getNab, wait } from "@/logic/common"
+import dao from "../../db"
+import { getNab, wait } from "../../logic/common"
 
 const pct = (w ,l) => isNaN(w) || isNaN(l) ? '--' : Math.floor((w / (w+l))*10000)/100
 
@@ -27,7 +27,7 @@ function games(g) {
 
 export default async function whothisnab(say: (comment: string) => void, name: string, current: boolean = false) {
 
-  console.log(name)
+  console.debug(name)
 
   if (!name || name.length === 0) {
     say('Please specify a name')
@@ -48,7 +48,7 @@ export default async function whothisnab(say: (comment: string) => void, name: s
       const nab = await dao.getNabById(id)
       const notes = await dao.getNotes(id)
 
-      console.log(nab)
+      console.debug(nab)
       
       return {
         currentName: names.find(n => n.current)!.name,
@@ -74,7 +74,7 @@ export default async function whothisnab(say: (comment: string) => void, name: s
 
       const nab = response[i]
       const names = nab.names.slice(0,5).join(', ')
-      const notes = nab.notes.length > 0 ? `Notes: ${nab.notes.map(({ note }) => note).join('. ')}` : ''
+      const notes = nab.notes.length > 0 ? `${nab.notes.map(({ note }) => note).join('. ')}` : ''
       const steamAccount = nab.avatar.match(/avatars.steamstatic.com/)
       const message = `${games(nab.wins+nab.losses)} (${nab.wins+nab.losses}) ${nab.currentName}
         [${shortDate(nab.added_at)}] - 

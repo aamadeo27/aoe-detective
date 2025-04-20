@@ -1,4 +1,3 @@
-import dao from "../db"
 import { getNab } from "./common"
 
 type Player = {
