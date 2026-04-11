@@ -1,5 +1,5 @@
-import axios, { AxiosError } from 'axios'
-const MAX_PAGES = 7
+import axios from 'axios'
+const MAX_PAGES = 10
 
 export async function fetchPlayers(searchPlayer: string = ''){
 
@@ -20,7 +20,8 @@ export async function fetchPlayers(searchPlayer: string = ''){
         sortDirection: "ASC"
       }
     ).then(response => {
-      const playerList = response.data.items
+      const { items } = response.data as any
+      const playerList = items
         ?.map(({ avatarUrl, elo, rlUserId, userName, region, wins, losses, rank, winStreak }) => 
           ({ avatarUrl, elo, rlUserId, userName, region, wins, losses, rank, streak: winStreak }))
         .sort((a,b) => b.elo - a.elo)
@@ -61,12 +62,13 @@ export async function fetchMatchlist(nabId: number, savedMatches: Set<string>, f
           matchType: "2"
         }
       )
-      response.data.matchList?.map( match => {
+      const { matchList } = response.data as any
+      matchList?.map( match => {
         if (savedMatches.has(match.gameId)) return
         gameIds.add(match.gameId)
       })
 
-      if ((response.data.matchList?.length ?? 0) < 10) {
+      if ((matchList?.length ?? 0) < 10) {
         break
       }
 
@@ -75,7 +77,7 @@ export async function fetchMatchlist(nabId: number, savedMatches: Set<string>, f
       await new Promise((r) => setTimeout(r, 50)) 
       tries = 0
     } catch(error){
-      console.log('Error while getting match list try #', tries)
+      console.error('Error while getting match list try #', tries)
       tries++
     }
   }
@@ -91,11 +93,11 @@ export async function fetchMatchDetail(gameId: string, profileId: string) {
       'https://api.ageofempires.com/api/AgeDE/getMatchDetail',
       { gameId, profileId: `${profileId}` }
     ).catch(async error => {
-      const axerr = error as AxiosError
+      const axerr = error as any
       console.error(`#${tries} => Error\n`)
 
       if (!axerr.status || axerr.status > 500 || tries === 5) {
-        console.log(axerr.message)
+        console.error(axerr.message)
       }
 
       tries++
@@ -108,4 +110,6 @@ export async function fetchMatchDetail(gameId: string, profileId: string) {
     if (!errorCatched) return response.data      
   } while(true)
 }
+
+export * from './ads'
 
