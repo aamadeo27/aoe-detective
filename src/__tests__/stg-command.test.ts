@@ -29,6 +29,17 @@ describe('stg command', () => {
     expect(say).toHaveBeenCalledWith('No advertisements found matching "query".')
   })
 
+  test('rate-limited returns friendly message', async () => {
+    const err: any = new Error('Rate limited')
+    err.status = 429
+    err.retryAfter = 5
+    ;(findAdvertisementsByTitle as jest.Mock).mockRejectedValue(err)
+
+    const say = jest.fn()
+    await stg(say, 'query', 'user')
+    expect(say).toHaveBeenCalledWith('AoE ads API rate limited. Try again in 5 seconds.')
+  })
+
   test('success path posts teams', async () => {
     const lobby = { name: 'L', players: [{ name: 'A', elo: 1600 }, { name: 'B', elo: 1400 }] }
     ;(findAdvertisementsByTitle as jest.Mock).mockResolvedValue([lobby])

@@ -39,7 +39,7 @@ const evalTeams = (selector, players: Player[]) => {
   const t1 = selector[0] 
   const division: Record<string, any> = {
       selector: selector.map( i => i === t1 ? 1 : 2 ).join(''),
-      selector2: `${
+      selector2: `$${
         selector.map((v,i) => v === 0 ? i+1 : '').join('')} vs ${
         selector.map((v,i) => v === 1 ? i+1 : '').join('')
       }`,
@@ -152,41 +152,15 @@ export const makeTeamsFromLobby = async (lobby: { name: string; players: { name:
 
   if (players.length % 2 === 1) return { errors: [`Lobby "${lobby.name}" has odd number of players: ${players.length}`] }
 
-  // Resolve missing ELOs in parallel
-  const lookups = players.map((p, i) => (async () => {
-    if (p.elo !== null && p.elo !== undefined) return { name: p.name, elo: p.elo as number, multiMatchWarning: null }
-
-    try {
-      const nab = await getNab(p.name, i, true)
-      if (nab) {
-        if (Array.isArray(nab) && nab.length === 1) {
-          return { name: p.name, elo: nab[0].elo ?? null, multiMatchWarning: null }
-        } else if (Array.isArray(nab) && nab.length > 1) {
-          return { name: p.name, elo: nab[0].elo ?? null, multiMatchWarning: `${p.name} matched ${nab.length} entries; using first` }
-        } else if ((nab as any).elo) {
-          return { name: p.name, elo: (nab as any).elo, multiMatchWarning: null }
-        }
-      }
-    } catch (err) {
-      // ignore lookup errors and fall back
-    }
-
-    return { name: p.name, elo: null, multiMatchWarning: null }
-  })())
-
-  const resolved: Player[] = []
-  const lookupResults = await Promise.all(lookups)
-
-  lookupResults.forEach((res) => {
-    if (res.multiMatchWarning) warnings.push(res.multiMatchWarning)
-
-    let elo = res.elo
+  // Map lobby players to anonymous players using only ELO (default missing to 1500)
+  const resolved: Player[] = players.map((p, i) => {
+    let elo = p.elo
     if (elo === null || elo === undefined) {
+      warnings.push(`Missing ELO for ${p.name}; defaulting to 1500`)
       elo = 1500
-      warnings.push(`Missing ELO for ${res.name}; defaulting to 1500`)
     }
 
-    resolved.push({ name: res.name, elo: elo as number })
+    return { name: `P${i + 1}`, elo: elo as number }
   })
 
   const division = teamsFromPlayers(resolved)

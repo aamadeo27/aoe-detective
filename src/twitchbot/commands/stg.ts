@@ -13,15 +13,15 @@ export default async function stg(say: (comment: string) => void, args: string, 
     lobbies = await findAdvertisementsByTitle(query)
   } catch (err: any) {
     console.error(err)
-    say('AoE ads API is unreachable. Try again later.')
+    if (err?.status === 429) {
+      const ra = err?.retryAfter
+      if (ra !== undefined && ra !== null) say(`AoE ads API rate limited. Try again in ${ra} seconds.`)
+      else say('AoE ads API rate limited. Try again later.')
+    } else {
+      say('AoE ads API is unreachable. Try again later.')
+    }
     return
   }
-
-  if (!lobbies || lobbies.length === 0) {
-    say(`No advertisements found matching "${query}".`)
-    return
-  }
-
   if (!lobbies || lobbies.length === 0) {
     say(`No advertisements found matching "${query}".`)
     return
@@ -46,7 +46,7 @@ export default async function stg(say: (comment: string) => void, args: string, 
     const sanitize = (s: any, max = 24) => {
       if (!s) return ''
       let v = String(s)
-      v = v.replace(/[\r\n]+/g, ' ').replace(/[^\x20-\x7E]/g, '')
+      v = v.replace(/[\r\n]+/g, ' ').replace(/[\x00-\x1F\x7F]/g, '')
       v = v.trim()
       if (v.length > max) v = v.slice(0, max - 1) + '…'
       return v

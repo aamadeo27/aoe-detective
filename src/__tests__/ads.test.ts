@@ -62,4 +62,18 @@ describe('ads normalizer', () => {
     expect(res.length).toBeGreaterThan(0)
     jest.useRealTimers()
   })
+
+  test('throws exhausted 429 after retries with retryAfter set', async () => {
+    jest.useFakeTimers()
+    const fakeClient = { get: jest.fn().mockRejectedValue({ response: { status: 429, headers: { 'retry-after': '0' } } }) }
+
+    const promise = findAdvertisementsByTitle('x', fakeClient as any)
+    // allow the rejection and any scheduled timers to run
+    await Promise.resolve()
+    jest.runAllTimers()
+    await Promise.resolve()
+
+    await expect(promise).rejects.toMatchObject({ status: 429, retryAfter: 0 })
+    jest.useRealTimers()
+  })
 })

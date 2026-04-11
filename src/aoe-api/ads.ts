@@ -108,9 +108,11 @@ export function normalizeAdvertisement(raw: any): Lobby | null {
 export async function findAdvertisementsByTitle(title: string, client?: HttpClient): Promise<Lobby[]> {
   const http = client ?? defaultHttp;
   const url = `${DEFAULT_BASE}?title=${encodeURIComponent(title)}`;
-
   const maxAttempts = 3;
   let attempt = 0;
+  let lastErr: any = null;
+  let lastStatus: number | undefined = undefined;
+  let lastRetryAfter: number | null = null;
 
   while (attempt < maxAttempts) {
     try {
@@ -134,21 +136,35 @@ export async function findAdvertisementsByTitle(title: string, client?: HttpClie
       const status = axerr?.response?.status ?? axerr?.status;
       const headers = axerr?.response?.headers ?? axerr?.headers ?? {};
 
+      lastErr = axerr;
+      lastStatus = status;
+
       if (status === 429) {
         const ra = headers['retry-after'] || headers['Retry-After'];
         const wait = parseRetryAfterHeader(ra) ?? 1;
-        await new Promise(r => setTimeout(r, wait * 1000));
+        lastRetryAfter = wait;
         attempt++;
+        if (attempt >= maxAttempts) break;
+        // If Retry-After is zero, retry immediately without scheduling timers
+        if (wait > 0) {
+          await new Promise(r => setTimeout(r, wait * 1000));
+        }
         continue;
       }
 
       attempt++;
-      if (attempt >= maxAttempts) {
-        const msg = axerr?.message ? `: ${axerr.message}` : '';
-        throw new Error('AoE ads API unreachable' + msg);
-      }
+      if (attempt >= maxAttempts) break;
       await new Promise(r => setTimeout(r, 200 * attempt));
     }
+  }
+
+  // if we exhausted retries, throw an error with status info
+  if (lastErr) {
+    const msg = lastErr?.message ? `: ${lastErr.message}` : '';
+    const e: any = new Error('AoE ads API unreachable' + msg);
+    if (lastStatus !== undefined) e.status = lastStatus;
+    if (lastStatus === 429) e.retryAfter = lastRetryAfter;
+    throw e;
   }
 
   return [];
