@@ -3,13 +3,15 @@ import { getNab } from "./common"
 type Player = {
   elo: number
   name: string
+  team?: number
+  position?: number
 }
 
 const evalTeams = (selector, players: Player[]) => {
 
   const teams = [
-    { elo: 0, players: [], sqAvg: 0, avg: 0, variance: 0, std: 0, vagabundos: 0 },
-    { elo: 0, players: [], sqAvg: 0, avg: 0, variance: 0, std: 0, vagabundos: 0 }
+    { elo: 0, players: [], sqAvg: 0, avg: 0, variance: 0, std: 0  },
+    { elo: 0, players: [], sqAvg: 0, avg: 0, variance: 0, std: 0 }
   ]
 
   const maxDiff = 
@@ -19,14 +21,8 @@ const evalTeams = (selector, players: Player[]) => {
 
   selector.forEach( (t,p) => {
       teams[t].players.push({ ...players[p], position: p })
-      teams[t].elo += players[p].elo
-      
-      teams[t].vagabundos += players[p].name.match(/^Vagabundo\d+/) ? 1 : 0
+      teams[t].elo += players[p].elo      
   })
-
-  if (teams[0].vagabundos > 1 || teams[1].vagabundos > 1) {
-    return { tooManyVagabundos: true }
-  }
 
   teams.forEach( team => {
       const n = team.players.length
@@ -65,7 +61,6 @@ const evalTeams = (selector, players: Player[]) => {
 
   return division
 }
-//tg 2857 1821 2782 2883 1864 1633 1535 1664
 const teamsFromPlayers = (players: Player []) => {
   if ( players.length % 2 === 1 ) return null;
 
@@ -73,7 +68,7 @@ const teamsFromPlayers = (players: Player []) => {
   let k = 1;
   let bestDivision = null;
 
-  while( k < 2**(selector.length-1) ){
+  while( k < 2**(selector.length) ){
       let remainder = 1;
       let numBalance = 0;
 
@@ -86,8 +81,11 @@ const teamsFromPlayers = (players: Player []) => {
           remainder = Math.floor(newValue/2);
 
           if ( i === selector.length - 1 && numBalance === 0 ) {
+              
+              const fixedTeamCompliance = selector.map( (v,i) => !players[i].team || (v+1) === players[i].team).every(Boolean);
+              if ( !fixedTeamCompliance ) continue;
+
               const division = evalTeams(selector, players)
-              console.log(division.selector, division.diff)
               if (division.tooManyVagabundos) continue
 
               bestDivision = bestDivision !== null && bestDivision.isBetterThan(division)
@@ -99,8 +97,6 @@ const teamsFromPlayers = (players: Player []) => {
       k++;
   }
 
-  console.log(bestDivision.teams)
-
   return bestDivision;
 }
 
@@ -110,7 +106,7 @@ export const makeTeams = async (list: string) => {
   const conflicts = []
   const errors = []
   const result = await Promise.all(
-    names.map(n => getNab(n, 0, true)) // just by name
+    names.map((nab,i) => getNab(nab, i, true)) // just by name
   )
 
   const playerList = result.map( (r: any, i) => {
@@ -128,13 +124,73 @@ export const makeTeams = async (list: string) => {
 
   const division = teamsFromPlayers(playerList)
 
+  // console.log(JSON.stringify(division, null ,2))
+
   return { division }
 }
 
 export const makeTeamsAnonymous = (list: string) => {
-  const newList = '$' + list.trim().replace(/\s+/g, ' $')  
-  const teams = makeTeams(newList)
+  
+  const players = list.split(' ').map( (r,i) => {
+    const input = r.split('-')
+    const elo = Number(input[0])
+    const team = input[1] ? Number(input[1]) : undefined
 
+    return { name: `P${(i+1)}`, elo, team }
+  })
+  const division = teamsFromPlayers(players)
 
-  return teams
+  return { division }
+}
+
+export const makeTeamsFromLobby = async (lobby: { name: string; players: { name: string; elo?: number | null }[] }) => {
+  const warnings: string[] = []
+  const errors: string[] = []
+
+  const players = lobby.players || []
+  if (players.length === 0) return { errors: [`Lobby "${lobby.name}" has no players`] }
+
+  if (players.length % 2 === 1) return { errors: [`Lobby "${lobby.name}" has odd number of players: ${players.length}`] }
+
+  // Resolve missing ELOs in parallel
+  const lookups = players.map((p, i) => (async () => {
+    if (p.elo !== null && p.elo !== undefined) return { name: p.name, elo: p.elo as number, multiMatchWarning: null }
+
+    try {
+      const nab = await getNab(p.name, i, true)
+      if (nab) {
+        if (Array.isArray(nab) && nab.length === 1) {
+          return { name: p.name, elo: nab[0].elo ?? null, multiMatchWarning: null }
+        } else if (Array.isArray(nab) && nab.length > 1) {
+          return { name: p.name, elo: nab[0].elo ?? null, multiMatchWarning: `${p.name} matched ${nab.length} entries; using first` }
+        } else if ((nab as any).elo) {
+          return { name: p.name, elo: (nab as any).elo, multiMatchWarning: null }
+        }
+      }
+    } catch (err) {
+      // ignore lookup errors and fall back
+    }
+
+    return { name: p.name, elo: null, multiMatchWarning: null }
+  })())
+
+  const resolved: Player[] = []
+  const lookupResults = await Promise.all(lookups)
+
+  lookupResults.forEach((res) => {
+    if (res.multiMatchWarning) warnings.push(res.multiMatchWarning)
+
+    let elo = res.elo
+    if (elo === null || elo === undefined) {
+      elo = 1500
+      warnings.push(`Missing ELO for ${res.name}; defaulting to 1500`)
+    }
+
+    resolved.push({ name: res.name, elo: elo as number })
+  })
+
+  const division = teamsFromPlayers(resolved)
+  if (!division) return { errors: [`Could not generate teams for lobby "${lobby.name}"`], warnings }
+
+  return { division, warnings }
 }
